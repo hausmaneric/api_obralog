@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.core.db import get_db
 from app.models import User
 from app.schemas import LoginRequest, LoginResponse
+from app.core.config import settings
 from app.security import create_access_token, verify_password
 
 router = APIRouter()
@@ -26,6 +27,8 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
     token = create_access_token(user.id, user.company_id, user.role.value)
     return LoginResponse(
         access_token=token,
+        token_type="bearer",
+        expires_in=settings.access_token_expire_minutes * 60,
         user_id=user.id,
         company_id=user.company_id,
         role=user.role.value,

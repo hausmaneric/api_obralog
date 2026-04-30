@@ -66,6 +66,8 @@ class LoginRequest(BaseModel):
 
 class LoginResponse(BaseModel):
     access_token: str
+    token_type: str
+    expires_in: int
     user_id: int
     company_id: int
     role: str

@@ -3,19 +3,26 @@ from sqlalchemy.orm import Session
 
 from app.core.db import get_db
 from app.models import User
+from app.security import decode_access_token
 
 
 def get_current_user(
-    x_company_id: int | None = Header(default=None),
-    x_user_id: int | None = Header(default=None),
+    authorization: str | None = Header(default=None),
     db: Session = Depends(get_db),
 ) -> User:
-    if x_company_id is None or x_user_id is None:
-        raise HTTPException(status_code=401, detail="Cabecalhos de autenticacao ausentes.")
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Cabecalho Authorization ausente.")
+    if not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Formato de Authorization invalido.")
+
+    token = authorization.removeprefix("Bearer ").strip()
+    payload = decode_access_token(token)
+    user_id = int(payload["sub"])
+    company_id = int(payload["company_id"])
 
     user = (
         db.query(User)
-        .filter(User.id == x_user_id, User.company_id == x_company_id, User.status == "active")
+        .filter(User.id == user_id, User.company_id == company_id, User.status == "active")
         .first()
     )
     if not user:
