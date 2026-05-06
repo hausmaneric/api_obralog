@@ -88,6 +88,100 @@ class DiaryUpdate(BaseModel):
     status: str | None = None
 
 
+class DiaryTeamEntryCreate(BaseModel):
+    company_id: int
+    diary_id: int
+    total_workers: int = 0
+    total_hours: int = 0
+    highlight_role: str | None = None
+
+
+class DiaryTeamEntryRead(DiaryTeamEntryCreate):
+    id: int
+
+    class Config:
+        from_attributes = True
+
+
+class DiaryActivityEntryCreate(BaseModel):
+    company_id: int
+    diary_id: int
+    title: str
+    status: str = "Em andamento"
+    progress: int = 0
+
+
+class DiaryActivityEntryRead(DiaryActivityEntryCreate):
+    id: int
+
+    class Config:
+        from_attributes = True
+
+
+class DiaryMaterialEntryCreate(BaseModel):
+    company_id: int
+    diary_id: int
+    material_name: str
+    quantity_label: str | None = None
+    movement_type: str = "Recebido"
+
+
+class DiaryMaterialEntryRead(DiaryMaterialEntryCreate):
+    id: int
+
+    class Config:
+        from_attributes = True
+
+
+class DiaryEquipmentEntryCreate(BaseModel):
+    company_id: int
+    diary_id: int
+    equipment_name: str
+    status: str = "Parado"
+    usage_hours: str | None = None
+
+
+class DiaryEquipmentEntryRead(DiaryEquipmentEntryCreate):
+    id: int
+
+    class Config:
+        from_attributes = True
+
+
+class DiaryOccurrenceEntryCreate(BaseModel):
+    company_id: int
+    diary_id: int
+    title: str
+    description: str | None = None
+    responsible: str | None = None
+    action_taken: str | None = None
+    status: str = "Aberta"
+    severity: str = "Baixa"
+
+
+class DiaryOccurrenceEntryRead(DiaryOccurrenceEntryCreate):
+    id: int
+
+    class Config:
+        from_attributes = True
+
+
+class DiaryPhotoEntryCreate(BaseModel):
+    company_id: int
+    diary_id: int
+    title: str
+    category: str | None = None
+    location: str | None = None
+    file_url: str | None = None
+
+
+class DiaryPhotoEntryRead(DiaryPhotoEntryCreate):
+    id: int
+
+    class Config:
+        from_attributes = True
+
+
 class LoginRequest(BaseModel):
     email: str
     password: str

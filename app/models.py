@@ -104,6 +104,100 @@ class ConstructionDiary(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     work: Mapped["Work"] = relationship(back_populates="diaries")
+    team_entries: Mapped[list["DiaryTeamEntry"]] = relationship(back_populates="diary", cascade="all, delete-orphan")
+    activity_entries: Mapped[list["DiaryActivityEntry"]] = relationship(back_populates="diary", cascade="all, delete-orphan")
+    material_entries: Mapped[list["DiaryMaterialEntry"]] = relationship(back_populates="diary", cascade="all, delete-orphan")
+    equipment_entries: Mapped[list["DiaryEquipmentEntry"]] = relationship(back_populates="diary", cascade="all, delete-orphan")
+    occurrence_entries: Mapped[list["DiaryOccurrenceEntry"]] = relationship(back_populates="diary", cascade="all, delete-orphan")
+    photo_entries: Mapped[list["DiaryPhotoEntry"]] = relationship(back_populates="diary", cascade="all, delete-orphan")
+
+
+class DiaryTeamEntry(Base):
+    __tablename__ = "diary_team_entries"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    company_id: Mapped[int] = mapped_column(ForeignKey("companies.id"), index=True)
+    diary_id: Mapped[int] = mapped_column(ForeignKey("construction_diaries.id"), index=True)
+    total_workers: Mapped[int] = mapped_column(Integer, default=0)
+    total_hours: Mapped[int] = mapped_column(Integer, default=0)
+    highlight_role: Mapped[str | None] = mapped_column(String(120))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    diary: Mapped["ConstructionDiary"] = relationship(back_populates="team_entries")
+
+
+class DiaryActivityEntry(Base):
+    __tablename__ = "diary_activity_entries"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    company_id: Mapped[int] = mapped_column(ForeignKey("companies.id"), index=True)
+    diary_id: Mapped[int] = mapped_column(ForeignKey("construction_diaries.id"), index=True)
+    title: Mapped[str] = mapped_column(String(160), nullable=False)
+    status: Mapped[str] = mapped_column(String(40), default="Em andamento")
+    progress: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    diary: Mapped["ConstructionDiary"] = relationship(back_populates="activity_entries")
+
+
+class DiaryMaterialEntry(Base):
+    __tablename__ = "diary_material_entries"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    company_id: Mapped[int] = mapped_column(ForeignKey("companies.id"), index=True)
+    diary_id: Mapped[int] = mapped_column(ForeignKey("construction_diaries.id"), index=True)
+    material_name: Mapped[str] = mapped_column(String(160), nullable=False)
+    quantity_label: Mapped[str | None] = mapped_column(String(80))
+    movement_type: Mapped[str] = mapped_column(String(40), default="Recebido")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    diary: Mapped["ConstructionDiary"] = relationship(back_populates="material_entries")
+
+
+class DiaryEquipmentEntry(Base):
+    __tablename__ = "diary_equipment_entries"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    company_id: Mapped[int] = mapped_column(ForeignKey("companies.id"), index=True)
+    diary_id: Mapped[int] = mapped_column(ForeignKey("construction_diaries.id"), index=True)
+    equipment_name: Mapped[str] = mapped_column(String(160), nullable=False)
+    status: Mapped[str] = mapped_column(String(40), default="Parado")
+    usage_hours: Mapped[str | None] = mapped_column(String(80))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    diary: Mapped["ConstructionDiary"] = relationship(back_populates="equipment_entries")
+
+
+class DiaryOccurrenceEntry(Base):
+    __tablename__ = "diary_occurrence_entries"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    company_id: Mapped[int] = mapped_column(ForeignKey("companies.id"), index=True)
+    diary_id: Mapped[int] = mapped_column(ForeignKey("construction_diaries.id"), index=True)
+    title: Mapped[str] = mapped_column(String(160), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text)
+    responsible: Mapped[str | None] = mapped_column(String(120))
+    action_taken: Mapped[str | None] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(40), default="Aberta")
+    severity: Mapped[str] = mapped_column(String(40), default="Baixa")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    diary: Mapped["ConstructionDiary"] = relationship(back_populates="occurrence_entries")
+
+
+class DiaryPhotoEntry(Base):
+    __tablename__ = "diary_photo_entries"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    company_id: Mapped[int] = mapped_column(ForeignKey("companies.id"), index=True)
+    diary_id: Mapped[int] = mapped_column(ForeignKey("construction_diaries.id"), index=True)
+    title: Mapped[str] = mapped_column(String(160), nullable=False)
+    category: Mapped[str | None] = mapped_column(String(80))
+    location: Mapped[str | None] = mapped_column(String(160))
+    file_url: Mapped[str | None] = mapped_column(String(255))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    diary: Mapped["ConstructionDiary"] = relationship(back_populates="photo_entries")
 
 
 class PasswordResetRequest(Base):
