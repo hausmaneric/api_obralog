@@ -24,7 +24,9 @@ def list_works(
 
 
 @router.post("/", response_model=WorkRead)
-def create_work(payload: WorkCreate, db: Session = Depends(get_db)):
+def create_work(payload: WorkCreate, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    if payload.company_id != current_user.company_id:
+        raise HTTPException(status_code=403, detail="Nao e permitido criar obra para outra empresa.")
     work = Work(**payload.model_dump())
     db.add(work)
     db.commit()

@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.core.db import get_db
 from app.dependencies import get_current_user
-from app.models import ConstructionDiary
+from app.models import ConstructionDiary, DiaryStatus, Work
 from app.schemas import DiaryCreate, DiaryRead, DiaryUpdate
 
 router = APIRouter()
@@ -22,7 +22,12 @@ def list_diaries(
 
 
 @router.post("/", response_model=DiaryRead)
-def create_diary(payload: DiaryCreate, db: Session = Depends(get_db)):
+def create_diary(payload: DiaryCreate, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    if payload.company_id != current_user.company_id:
+        raise HTTPException(status_code=403, detail="Nao e permitido criar diario para outra empresa.")
+    work = db.query(Work).filter(Work.id == payload.work_id, Work.company_id == current_user.company_id).first()
+    if not work:
+        raise HTTPException(status_code=404, detail="Obra nao encontrada para esta empresa.")
     existing = (
         db.query(ConstructionDiary)
         .filter(
@@ -49,7 +54,7 @@ def update_diary(diary_id: int, payload: DiaryUpdate, db: Session = Depends(get_
 
     data = payload.model_dump(exclude_unset=True)
     if "status" in data and data["status"] is not None:
-        diary.status = data["status"]
+        diary.status = DiaryStatus(data["status"])
         data.pop("status")
 
     for field, value in data.items():
