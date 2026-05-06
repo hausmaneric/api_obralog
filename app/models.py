@@ -44,6 +44,7 @@ class Company(Base):
 
     works: Mapped[list["Work"]] = relationship(back_populates="company")
     users: Mapped[list["User"]] = relationship(back_populates="company")
+    password_reset_requests: Mapped[list["PasswordResetRequest"]] = relationship(back_populates="company")
 
 
 class User(Base):
@@ -59,6 +60,7 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     company: Mapped["Company"] = relationship(back_populates="users")
+    password_reset_requests: Mapped[list["PasswordResetRequest"]] = relationship(back_populates="user")
 
 
 class Work(Base):
@@ -103,3 +105,17 @@ class ConstructionDiary(Base):
 
     work: Mapped["Work"] = relationship(back_populates="diaries")
 
+
+class PasswordResetRequest(Base):
+    __tablename__ = "password_reset_requests"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    company_id: Mapped[int] = mapped_column(ForeignKey("companies.id"), index=True)
+    user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), index=True, nullable=True)
+    email: Mapped[str] = mapped_column(String(120), nullable=False)
+    token: Mapped[str] = mapped_column(String(120), nullable=False, unique=True)
+    status: Mapped[str] = mapped_column(String(20), default="pending")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    company: Mapped["Company"] = relationship(back_populates="password_reset_requests")
+    user: Mapped["User | None"] = relationship(back_populates="password_reset_requests")
