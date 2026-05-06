@@ -5,8 +5,9 @@ Revises:
 Create Date: 2026-04-30 15:20:00
 """
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
+from sqlalchemy.dialects import postgresql
 
 
 revision = "20260430_01"
@@ -15,16 +16,20 @@ branch_labels = None
 depends_on = None
 
 
-user_role = sa.Enum("owner", "engineer", "foreman", "viewer", name="userrole")
-work_status = sa.Enum("planned", "in_progress", "paused", "finished", "cancelled", name="workstatus")
-diary_status = sa.Enum("draft", "submitted", "approved", "rejected", "locked", name="dairystatus")
+user_role = postgresql.ENUM("owner", "engineer", "foreman", "viewer", name="userrole", create_type=False)
+work_status = postgresql.ENUM("planned", "in_progress", "paused", "finished", "cancelled", name="workstatus", create_type=False)
+diary_status = postgresql.ENUM("draft", "submitted", "approved", "rejected", "locked", name="dairystatus", create_type=False)
+
+user_role_create = postgresql.ENUM("owner", "engineer", "foreman", "viewer", name="userrole")
+work_status_create = postgresql.ENUM("planned", "in_progress", "paused", "finished", "cancelled", name="workstatus")
+diary_status_create = postgresql.ENUM("draft", "submitted", "approved", "rejected", "locked", name="dairystatus")
 
 
 def upgrade() -> None:
     bind = op.get_bind()
-    user_role.create(bind, checkfirst=True)
-    work_status.create(bind, checkfirst=True)
-    diary_status.create(bind, checkfirst=True)
+    user_role_create.create(bind, checkfirst=True)
+    work_status_create.create(bind, checkfirst=True)
+    diary_status_create.create(bind, checkfirst=True)
 
     op.create_table(
         "companies",
@@ -106,6 +111,6 @@ def downgrade() -> None:
     op.drop_table("companies")
 
     bind = op.get_bind()
-    diary_status.drop(bind, checkfirst=True)
-    work_status.drop(bind, checkfirst=True)
-    user_role.drop(bind, checkfirst=True)
+    diary_status_create.drop(bind, checkfirst=True)
+    work_status_create.drop(bind, checkfirst=True)
+    user_role_create.drop(bind, checkfirst=True)
